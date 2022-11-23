@@ -1,0 +1,4 @@
+SELECT * FROM employee;
+SELECT * FROM JOB;
+SELECT * FROM LOCATION;
+SELECT * FROM national;
