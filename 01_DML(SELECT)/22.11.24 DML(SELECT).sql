@@ -96,7 +96,7 @@ FROM EMPLOYEE;
 */
 
 --EMPLOYEE 테이블의 사번, 사원명, 급여 조회
-SELECT EMP_ID, EMP_NAME, SALARY, '원' AS "단위"
+SELECT EMP_ID, EMP_NAME, SALARY || '원' AS "급여(원)"
 FROM EMPLOYEE;
 
 /*
@@ -126,6 +126,9 @@ FROM EMPLOYEE;
 --EMPLOYEE 테이블의 직급코드 조회(중복제거)
 SELECT DISTINCT JOB_CODE
 FROM EMPLOYEE; -->중복이 제거돼서 7행만 조회됨.
+
+SELECT DISTINCT JOB_CODE
+FROM EMPLOYEE;
 
 -- 사원들이 어떤 부서에 속해있는지 궁금하다.
 SELECT DISTINCT DEPT_CODE
@@ -165,7 +168,13 @@ SELECT *
 FROM EMPLOYEE
 WHERE DEPT_CODE = 'D9'; -- DB는 다 문자열이기에 별칭외에는 ''사용
 
+
+
 --EMPLOYEE 테이블에서 부서코드가 'D1'인 사원들의 사원명, 급여, 부서코드만 조회
+SELECT EMP_NAME, SALARY, DEPT_CODE
+FROM EMPLOYEE
+WHERE DEPT_CODE = 'D1'; 
+
 SELECT EMP_NAME, SALARY, DEPT_CODE
 FROM EMPLOYEE
 WHERE DEPT_CODE = 'D1'; 
@@ -318,6 +327,10 @@ SELECT EMP_ID, EMP_NAME, EMAIL
 FROM EMPLOYEE
 WHERE EMAIL LIKE '___$_%' ESCAPE '$'; --$를만나는순가 와일드 카드를 탈출해라~
 
+SELECT EMP_ID, EMP_NAME, EMAIL
+FROM EMPLOYEE
+WHERE EMAIL LIKE '___$_________%' ESCAPE '$';
+
 --위의 사원들이 아닌 그 외의 사원들 조회 NOT 사용 컬럼 앞 또는 LIKE앞에 가능.
 SELECT EMP_ID, EMP_NAME, EMAIL
 FROM EMPLOYEE
@@ -384,6 +397,10 @@ WHERE DEPT_CODE IN ('D6','D8','D5');
 
 SELECT EMP_NAME, DEPT_CODE, SALARY
 FROM EMPLOYEE
+WHERE DEPT_CODE IN('D6','D8','D5');
+
+SELECT EMP_NAME, DEPT_CODE, SALARY
+FROM EMPLOYEE
 WHERE DEPT_CODE NOT IN ('D6','D8','D5');
 
 --=======================================================================================
@@ -408,12 +425,69 @@ WHERE (JOB_CODE = 'J7' OR JOB_CODE = 'J2') AND SALARY >= 2000000;
 --괄호를 없애면 J2 AND SALARY를 먼저하고 OR J7 했기에 값이 이상하게 조회가 되었음.
 
 -----------------------------------------실습문제-----------------------------------
+-- 1. 사수가 없고 부서배치도 받지 않은 사원들의 (사원명, 사수사번, 부서코드) 조회
+SELECT EMP_NAME, MANAGER_ID, DEPT_CODE
+FROM EMPLOYEE
+WHERE MANAGER_ID IS NULL AND DEPT_CODE IS NULL;
 
+-- 2. 연봉(보너스미포함)이 3000만원 이상이고 보너스를 받지 않는 사원들의 (사번, 사원명, 급여, 보너스) 조회
+SELECT EMP_ID, EMP_NAME, SALARY, BONUS
+FROM EMPLOYEE
+WHERE BONUS IS NULL AND SALARY * 12 >=30000000;
 
+-- 3. 입사일이 '95/01/01' 이상이고 부서배치를 받은 사원들의 (사번, 사원명, 입사일, 부서코드) 조회
+SELECT EMP_ID, EMP_NAME, HIRE_DATE, DEPT_CODE
+FROM EMPLOYEE
+WHERE HIRE_DATE >= '95/01/01' AND DEPT_CODE IS NOT NULL;
+
+-- 4. 급여가 200만원 이상 500만원 이하이고 입사일이 '01/01/01' 이상이고 보너스를 받지 않는 사원들의
+-- (사번, 사원명, 급여, 입사일, 보너스) 조회
+SELECT EMP_ID, EMP_NAME, SALARY, HIRE_DATE, BONUS
+FROM EMPLOYEE
+WHERE SALARY BETWEEN 2000000 AND 5000000 AND HIRE_DATE >= '01/01/01' AND BONUS IS NULL;
+
+-- 5. 보너스포함연봉이 NULL이 아니고 이름에 '하'가 포함되어있는 사원들의 (사번, 사원명, 급여, 보너스포함연봉) 조회 (별칭부여)
+SELECT EMP_ID, EMP_NAME, SALARY, (SALARY+SALARY*BONUS)*12 AS "보너스 포함 연봉"
+FROM EMPLOYEE
+WHERE (SALARY+SALARY*BONUS)*12 IS NOT NULL AND EMP_NAME LIKE '%하%';
+
+-----------------------------------------------------------------------------------------------------
+SELECT EMP_ID, EMP_NAME, SALARY --실행 3번
+FROM EMPLOYEE -- 실행 1번
+WHERE DEPT_CODE IS NULL; -- 실행 2번
+
+--================================================================================
+/* 
+    < ORDER BY 절> => 정렬 
+    가장 마지막줄에 작성 뿐만아니라 실행순서 또한 마지막에 실행 
+    
+    [표현법]
+    SELECT 조회할컬럼1, 컬럼2, 컬럼3....., 산술연산식 AS "별칭",.....
+    FROM 조회하고자 하는 테이블 명
+    WHERE 조건식 
+    ORDER BY 정렬하고싶은 컬럼|별칭|컬럼순번 [ASC/DESC] [NULLS FIRST|NULLS LAST]
+    
+    마지막에 실행되기에 별칭을 쓸수 있음. 오름차순/ 내림차순 생략가능하지만 기본으로 오름차순
+    NULLS FIRST는 NULL이 맨 위에 정렬 , NULLS LAST는 NULL이 맨 아래에 정렬 생략 가능.
+    -NULLS FIRST: 정렬하고자 하는 컬럼값에 NULL잉 있을 경우 해당 데이터를 맨 앞 배치 (생략시 DESC일때의 기본값)
+    -NULLS LAST: 정렬하고자 하는 컬럼값에 NULL이 있을 경우 해당 데이터를 맨 뒤 배치(생략시 ASC일때의 기본값)
+*/
+--오름차순은 NULLS LAST 내림차순은 NULLS FIRST
  
+SELECT *
+FROM EMPLOYEE
+--ORDER BY BONUS;
+--ORDER BY BONUS ASC;       --오름차순 정렬일 때 기본적으로 NULLS LAST구나!!
+--ORDER BY BONUS ASC NULLS FIRST;
+--ORDER BY BONUS DESC;      --내림차순 정렬일 때 기본적으로 NULLS FIRST구나!!
+ORDER BY BONUS DESC, SALARY ASC; --정렬기준 여러개 제시 가능. 첫번째 기준의 컬럼값이 동일할 경우 두번째 기준 컬럼가지고 정렬
 
-
-
+--전 사원의 사원명 , 연봉 조회(이때 연봉별 내림차순 정렬 조회)
+SELECT EMP_NAME, SALARY * 12 AS "연봉"
+FROM EMPLOYEE
+--ORDER BY SALARY * 12 DESC;
+--ORDER BY "연봉" DESC; --별칭 사용 가능
+ORDER BY 2 DESC; --컬럼순번 사용 가능(컬럼개수보다 큰 숫자 안됨)
 
 
 
