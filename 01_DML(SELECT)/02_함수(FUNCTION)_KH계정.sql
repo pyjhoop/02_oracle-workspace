@@ -233,7 +233,287 @@ SELECT MOD(10.9,3) FROM DUAL;
     소숫점 1번째 자리에서 반올림한다.
 */
 
-SELECT ROUND(123.466)FROM DUAL;
+SELECT ROUND(123.466)FROM DUAL; -- 위치 생략시 0
+SELECT ROUND(123.456,1) FROM DUAL;
+SELECT ROUND(123.456,5) FROM DUAL; -- 자리수보다 크면 그대로 나옴.
+SELECT ROUND(123.456,-1) FROM DUAL;
+SELECT ROUND(123.456,-2) FROM DUAL;
+--------------------------------------------------------------------------------
+/*
+    *CEIL
+    올림처리 해주는 함수
+    CEIL(NUMBER)
+*/
+SELECT CEIL(123.156)FROM DUAL; -- 올림이닌 무조건 올림 위치지정 불가.
+-------------------------------------------------------------------------------
+/*
+    *FLOOR
+    소수점 아래 버림 처리하는 함수
+    FLOOR(NUMBER)
+*/
+SELECT FLOOR(3.141528) FROM DUAL;
+SELECT FLOOR(123.973) FROM DUAL; -- 소수점 무조건 버림, 위치지정 불가하다.
+--------------------------------------------------------------------------------
+/*
+    *TRUNC(절삭하다)  중요 
+    위치 지정 가능한 버림처리해주는 함수
+    TRUNC(NUMBER, [위치])
+*/
+SELECT TRUNC(123.456) FROM DUAL;
+SELECT TRUNC(123.456,1) FROM DUAL;
+SELECT TRUNC(123.456,2) FROM DUAL;
+SELECT TRUNC(123.456,-1) FROM DUAL;
+-- 소숫점은 절삭되고 실수 영역은 값이 내림으로 바뀐다.
+
+--------------------------------------------------------------------------------
+/*
+    <날짜 처리 함수>
+*/
+--* SYSDATE : 시스템 날짜 및 시간 반환(현재 날짜 및 시간)
+SELECT SYSDATE FROM DUAL; -- 연필 클릭하면 시간도 확인 가능하다.
+
+-- *MONTHS_BETWEEN (DATE1, DATE2) : 두 날짜 사이의 개월 수 => 내부적으로 DATE 1 - DATE2 후 나누기 30,31 이 진행됨.
+-- 결과값은 NUMBER 타입
+-- EMPLOYEE에서 사원명, 근무 일수, 근무 개월 수
+SELECT EMP_NAME, LPAD(TRUNC(SYSDATE - HIRE_DATE),10) ||' 일' AS "근무일수"
+,FLOOR(MONTHS_BETWEEN(SYSDATE,HIRE_DATE))||' 개월' AS "근무개월 수"
+FROM EMPLOYEE;
+
+--* ADD_MONTHS(DATE, NUMBER) : 특정날짜에 해당 숫자만큼의 개월수를 더해서 날짜를 리턴
+-- 결과값 : DATE 타입
+SELECT ADD_MONTHS(SYSDATE,6) FROM DUAL;
+
+--EMPLOYEE 에서 사원명, 입사일, 입사 후 6개월이 된 날짜
+SELECT EMP_NAME, HIRE_DATE, ADD_MONTHS(HIRE_DATE,6) AS "수습이 끝난 날짜"
+FROM EMPLOYEE;
+
+-- NEXT_DAY (DATE, 요일(문자|숫자) : 특정날짜 이후에 가까운 해당 요일의 날짜를 반환해주는 함수.
+-- 결과값 : DATE 타입
+SELECT SYSDATE, NEXT_DAY(SYSDATE,'금요일') FROM DUAL;
+SELECT SYSDATE, NEXT_DAY(SYSDATE,'금') FROM DUAL;
+-- 1. 일요일, 2. 월요일 ,...... 7. 토요일
+SELECT SYSDATE, NEXT_DAY(SYSDATE,6) FROM DUAL;
+SELECT SYSDATE, NEXT_DAY(SYSDATE,'FRIDAY') FROM DUAL; -- 언어가 한국어여서 이건 안먹힘.
+
+-- 언어 변경
+SELECT * FROM NLS_SESSION_PARAMETERS;
+
+ALTER SESSION SET NLS_LANGUAGE = KOREAN;
+
+--* LAST_DAY(DATE): 해당 월의 마지막 날짜를 반환해줌.
+-- => 결과값 : DATE 타입
+SELECT LAST_DAY(SYSDATE) FROM DUAL;
+
+--EMPLOYEE에서 사원명, 입사일, 입사한달의 마지막 날짜, 입사한 달에 근무한 일수 
+SELECT EMP_NAME, HIRE_DATE, LAST_DAY(HIRE_DATE), LAST_DAY(HIRE_DATE)-HIRE_DATE AS "근무일수"
+FROM EMPLOYEE;
+
+/*
+    * EXTRACT : 특정날짜로부터 년도| 월 | 일 값을 추출해서 반환하는 함수.
+    
+    EXTRACT(YEAR FROM DATE) :연도만 추출
+    EXTRACT(MONTH FROM DATE) : 월만 추출
+    EXTRACT(DAY FROM DATE) : 일만 추출
+*/
+
+--사원명, 입사년도, 입사워, 입사일 입사년도순으로 정렬
+SELECT EMP_NAME, EXTRACT(YEAR FROM HIRE_DATE) AS "입사년도", EXTRACT(MONTH FROM HIRE_DATE) AS "입사월"
+, EXTRACT(DAY FROM HIRE_DATE) AS "입사일"
+FROM EMPLOYEE
+--ORDER BY EXTRACT(YEAR FROM HIRE_DATE), EXTRACT(MONTH FROM HIRE_DATE), EXTRACT(DAY FROM HIRE_DATE);
+--ORDER BY "입사년도", "입사월", "입사일"; --ASC, DESC
+ORDER BY 2,3,4;
+-- 순서는 FROM -> WHERE -> SELECT -> ORDER BY 이기에 ORDER BY에서는 별칭사용 가능.
+-- 또한 WHERE 과 ORDER BY에서는 컬럼의 순번을 입력해서 사용도 가능하다. 
+
+
+-----------------------------------------------------------------------------------
+/*
+    < 형변환 함수 >
+    무조건 외워야함.
+    
+    *TO_CHAR() : 숫자 타입 또는 날짜 타입의 값을 문자타입으로 변환시켜주는 함수
+    
+    TO_CHAR(숫자|날짜, [포멧])        => 결과값은 CHARATER 타입!!
+*/
+
+-- 숫자타입 => 문자타입
+SELECT TO_CHAR(1234) FROM DUAL; --'1234'로 바뀌어있음
+
+SELECT TO_CHAR(12345,'99999') FROM DUAL; --'99999' 5칸짜리 공간확보 오른쪽 정렬도됨, 빈칸 공백 
+SELECT TO_CHAR(1234,'0000') FROM DUAL; -- 9또는 0만 가능. 0일경우 빈공간을 0으로 채움.
+--LPAD와 비슷하네
+SELECT TO_CHAR(1234,'L99999') FROM DUAL; -- 현재 설정된 나라(L: LOCAL)의 화폐단위
+SELECT TO_CHAR(1234,'$99999') FROM DUAL;
+SELECT TO_CHAR(12345,'L999,999') FROM DUAL; -- 이렇게 포멧을 지정할 수 있다.
+
+SELECT EMP_NAME, TO_CHAR(SALARY,'L999,999,999') AS "SALARY"
+FROM EMPLOYEE;
+-- 결국 숫자를 포멧팅 할려면 문자열로 바꿔줘야함.
+
+--날짜 타입 => 문자타입
+SELECT SYSDATE FROM DUAL;
+SELECT TO_CHAR(SYSDATE)FROM DUAL; -- 클랙해보면 다름! 날짜 타입은 시간 나옴 얘는 안나옴
+SELECT TO_CHAR(SYSDATE,'AM HH:MI:SS')FROM DUAL; --HH: 12시간 형식
+SELECT TO_CHAR(SYSDATE,'PM HH24:MI:SS')FROM DUAL; --HH24: 24시간 형식
+SELECT TO_CHAR(SYSDATE,'YYYY-MM-DD DAY DY')FROM DUAL;
+-- 날짜는 자바보단 DB에서 많이 다룬다. 자바는 좀 이상해서
+SELECT TO_CHAR(SYSDATE,'MON, YYYY')FROM DUAL;
+SELECT TO_CHAR(SYSDATE,'YEAR MM-DD')FROM DUAL;
+SELECT TO_CHAR(SYSDATE,'YYYY.MM.DD AM HH:MI:SS DAY')FROM DUAL;
+
+SELECT EMP_NAME, TO_CHAR(HIRE_DATE,'YYYY-MM-DD DAY HH:MI:SS')
+FROM EMPLOYEE;
+
+--EX) 1990년 02월 06일 형식으로
+SELECT EMP_NAME, HIRE_DATE, TO_CHAR(HIRE_DATE,'YYYY"년" MM"월" DD"일"') -- 포멧에 없는 것은 쌍따옴표로 감싸면 됨.
+FROM EMPLOYEE;
+
+--년도와 관련된 포멧
+SELECT TO_CHAR(SYSDATE,'YYYY'),
+       TO_CHAR(SYSDATE, 'YY'),
+       TO_CHAR(SYSDATE,'RRRR'),
+       TO_CHAR(SYSDATE,'RR'),
+       TO_CHAR(SYSDATE,'YEAR')
+FROM DUAL;
+
+--월과 관련된 포멧
+SELECT TO_CHAR(SYSDATE,'MM'),
+       TO_CHAR(SYSDATE,'MON'),
+       TO_CHAR(SYSDATE,'MONTH'),
+       TO_CHAR(SYSDATE,'RM')
+FROM DUAL;
+
+--일과 관련된 포멧
+SELECT TO_CHAR(SYSDATE,'DDD'), --올해 기준으로 오늘이 며칠째인지
+       TO_CHAR(SYSDATE,'DD'), --월 기준으로 오늘이 몇일째 인지.
+        TO_CHAR(SYSDATE,'D') --주 기준으로 몇일째 인지 1. 일요일 2. 월요일,..
+FROM DUAL;
+
+--요일에 대한 포멧
+SELECT TO_CHAR(SYSDATE,'DAY'),
+       TO_CHAR(SYSDATE,'DY') 
+FROM DUAL;
+-----------------------------------------------------------------------------
+/*
+    * TO_DATE : 숫자타입 또는 문자타입 데이터를 날짜 타입으로 변환시켜주는 함수
+    
+    TO_DATE(숫자|문자,[포멧])         => 결과값 : DATE 타입
+*/
+SELECT TO_DATE(20100101) FROM DUAL;
+SELECT TO_DATE(100101) FROM DUAL;
+
+SELECT TO_DATE(070101) FROM DUAL; -- 에러발생
+SELECT TO_DATE('070101') FROM DUAL; --첫글자가 0인 경우에는 문자타입으로 변경후 해야한다.
+
+SELECT TO_DATE('041030 143000') FROM DUAL; --에러발생
+SELECT TO_DATE('041030 143000','YYMMDD HH24MISS') FROM DUAL;
+
+SELECT TO_DATE('140630','YYMMDD') FROM DUAL; --2014년
+SELECT TO_DATE('980630','YYMMDD') FROM DUAL; -- 2098년으로 나옴 => 무조건 현재 세기로 반영
+
+SELECT TO_DATE('140630','RRMMDD') FROM DUAL; --2014
+SELECT TO_DATE('980630','RRMMDD') FROM DUAL; --1998
+--RR: 해당 두자리 년도 값이 50 미만일 경우 현재 세기를 반영, 50 이상일 경우 이전세기를 반영
+-- 주민 번호를 RR로 다룬다.
+--웹브라우저에서 날짜를 입력하면 자바로 넘어갈때 문자열 타입으로 넘어감. 또한 DB에도 문자열 타입으로 넘어감
+--실제 데이터는 DATE 타입이기에 이런 형변환을 해줘야함.
+
+----------------------------------------------------------------------------------------
+/*
+    *TO_NUMBER : 문자타입의 데이터를 숫자타입으로 변환시켜주는 함수
+    
+    TO_NUMBER(문자,[포멧])      => 결과값 : NUMBER 타입
+*/
+
+SELECT TO_NUMBER('013234320') FROM DUAL; --0이 빠져서 숫자타입으로 저장됨.
+
+SELECT '100000000' + '5500000' FROM DUAL; --오라클에서는 자동형변환이 잘 돼있음
+SELECT '100,000,000' + '5,500,000' FROM DUAL; -- 오류남 안에 숫자만 있어야 자동 형변환이 된다.
+SELECT TO_NUMBER('100,000,000','999,999,999')+ TO_NUMBER('55,000','99,999') FROM DUAL; -- 강제형변환
+--------------------------------------------------------------------------------
+/*
+    < NULL 처리 함수 > 중요 꼭 외워야함.
+*/
+--NVL(컬럼, 해당 컬럼값이 NULL일경우 반환할 값)
+SELECT EMP_NAME, BONUS,NVL(BONUS,0)
+FROM EMPLOYEE;
+
+--전체 사원의 이름과 보너스 포함 연봉을 해보겠다.
+SELECT EMP_NAME, TO_CHAR((SALARY+SALARY*NVL(BONUS,0))*12, 'L999,999,999' ) || '원' AS "연봉"
+FROM EMPLOYEE;
+
+SELECT EMP_NAME, NVL(DEPT_CODE,'부서없음')
+FROM EMPLOYEE;
+
+SELECT NVL(NULL, 'NULL임') FROM DUAL;
+
+--NVL2(컬럼, 반환값1, 반환값2) : NULL이 아니면 반환값1이 출력되고 NULL이면 반환값2가 출력됨.
+--컬럼값이 존재할 경우 반환값 1을 반환
+-- 컬럼값이 NULL일 경우 반호나값 2를 반환
+SELECT EMP_NAME, NVL2(DEPT_CODE, '부서있음', '"부서없음"')
+FROM EMPLOYEE;
+
+-- 보너스가 있는: 0.7/ 없는 : 0.1
+SELECT EMP_NAME, NVL2(BONUS,0.7,0.1)
+FROM EMPLOYEE;
+
+-- NULLIF(비교대상1, 비교대상2)
+-- 두 개의 값이 일치하면 NULL 반환
+-- 두 개의 값이 일치하지 않으면 비교대상1 값을 반환
+SELECT NULLIF('123','123')FROM DUAL;
+SELECT NULLIF('123','456')FROM DUAL;
+
+--------------------------------------------------------------------------------
+/*
+    <선택 함수>  외우면 됨
+    *DECODE(비교하고자하는 대상(컬럼|산술연산|함수식), 비교값1, 결과값1, 비교값2, 결과값2)
+    
+    SWITCH(동등비교 대상){
+    CASE 비교값1:BREAK;
+    CASE 비교값2:BREAK;
+    ...
+    DEFAULT: BREAK;
+*/
+
+--사번, 사원명, 주민번호
+SELECT
+EMP_ID, EMP_NAME, EMP_NO,SUBSTR(EMP_NO, 8,1),
+DECODE(SUBSTR(EMP_NO,8,1),'1','남','2','여','3','남','4','여') AS "성별"
+FROM EMPLOYEE;
+
+--직원의 급여를 조회시 직급별로 인상해서 조회
+-- J7 10% 인상 SALARY*1.1하면 됨.
+--J6인 사원 15%인상
+--J5인 사원 20% 인상
+-- 그외의 나머지 사원은 급여를 5%인상
+SELECT EMP_NAME, JOB_CODE, SALARY,
+DECODE(JOB_CODE,'J7',SALARY*1.1,'J6',SALARY*1.15,'J5',SALARY*1.2,SALARY*1.05) AS "인상된 급여" -- 디폴트는 그냥 마지막에 값만 쌔리면 됨
+FROM EMPLOYEE;
+
+/*
+    *CASE WHEN THEN
+    
+    CASE WHEN 조건식1 THEN 결과값1
+        WHEN 조건식2 THEN 결과값2
+        ...
+        ELSE 결과값
+    END
+*/
+
+SELECT EMP_NAME, SALARY,
+       CASE WHEN SALARY >= 5000000 THEN '고급개발자'
+            WHEN SALARY >=3500000 THEN '중급개발자'
+            ELSE '초급개발자'
+        END AS "레벨"
+FROM EMPLOYEE;
+
+
+
+
+
+
+
 
 
 
