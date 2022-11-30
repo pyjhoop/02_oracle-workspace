@@ -1,4 +1,3 @@
-
 --1. JOB 테이블의 모든 정보 조회
 SELECT *
 FROM JOB;
