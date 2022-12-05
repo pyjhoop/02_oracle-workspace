@@ -19,4 +19,4 @@ CREATE USER kh IDENTIFIED BY kh;
 --[표현법] GRANT 권한1, 권한2, ....TO 계정명
 
 GRANT CONNECT, RESOURCE TO kh;
-
+COMMIT;
