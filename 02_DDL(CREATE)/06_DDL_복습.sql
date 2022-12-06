@@ -1,0 +1,163 @@
+
+CREATE TABLE MEMBER(
+    MEM_NO NUMBER,
+    MEM_ID VARCHAR2(20),
+    MEM_PWD VARCHAR2(20),
+    MEM_NAME VARCHAR2(20),
+    GENDER CHAR(3),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    MEM_DATE DATE
+);
+
+-- 테이블 삭제하고자 할 때
+DROP TABLE MEMEBER;
+SELECT * FROM MEMBER;
+--주의 사항
+-- 컬럼명에 오타가 나서 고치고 싶을경우 테이블 DROP해서 재생성
+--또는 ALTER로 수정해야함.
+
+SELECT * FROM USER_TABLES;
+
+SELECT * FROM USER_TAB_COLUMNS;
+
+-- 컬럼명에 주석 즉 커맨트 달기
+COMMENT ON COLUMN MEMBER.MEM_NO IS '회원번호';
+COMMENT ON COLUMN MEMBER.MEM_ID IS '회원아이디';
+COMMENT ON COLUMN MEMBER.MEM_PWD IS '회원비밀번호';
+COMMENT ON COLUMN MEMBER.MEM_NAME IS '회원명';
+COMMENT ON COLUMN MEMBER.GENDER IS '성별(남/여)';
+COMMENT ON COLUMN MEMBER.PHONE IS '전화번호';
+COMMENT ON COLUMN MEMBER.EMAIL IS '이메일';
+COMMENT ON COLUMN MEMBER.MEM_DATE IS '회원가입일';
+
+SELECT * FROM MEMBER;
+
+-- 테이블에 데이터 넣기.
+INSERT INTO MEMBER VALUES(1,'user01','pass01','손흥민','남','010-1111-2222','aaa@naver.com','20/12/30');
+INSERT INTO MEMBER VALUES(2,'user02','pass02','황희찬','여',null,NULL,SYSDATE);
+INSERT INTO MEMBER VALUES(null,null,null,null,null,null,null,null);
+-- 유효하지 않는 데이터
+--그래서 우린 데이터의 무결성을 보장하기 위해 제약조건을 사용한다.
+
+-- 컬럼레벨방식: 컬럼명 타입 제약조건
+
+CREATE TABLE MEM_NOTNULL(
+    MEM_NO NUMBER NOT NULL,
+    MEM_ID VARCHAR2(20) NOT NULL,
+    MEM_PWD VARCHAR2(20) NOT NULL,
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50)
+);
+INSERT INTO MEM_NOTNULL VALUES(1,'user01','pass01','손흥민','남',null,null);
+INSERT INTO MEM_NOTNULL VALUES(2,'user02',null,'황희찬','여',null,'aaa@naver.com');
+-- NULL 이 들어가서 오류가 남.
+INSERT INTO MEM_NOTNULL VALUES(2,'user01','pass02','황희찬',null,null,null);
+SELECT * FROM MEM_NOTNULL;
+-- ID, MEM_ID가 동일한 값이 들어가도 잘 출력이 되네?? 이런건어떻게 처리함?
+-- UNIQUE가 나옴
+
+-- UNIQUE제약방식
+CREATE TABLE MEM_UNIQUE(
+    MEM_NO NUMBER NOT NULL,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL,
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50)
+);
+SELECT * FROM MEM_UNIQUE;
+DROP TABLE MEM_UNIQUE;
+
+-- 테이블 레벨 방식 UNIQUE
+CREATE TABLE MEM_UNIQUE(
+    MEM_NO NUMBER NOT NULL,
+    MEM_ID VARCHAR2(20) NOT NULL,
+    MEM_PWD VARCHAR2(20) NOT NULL,
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    UNIQUE(MEM_ID)
+);
+
+INSERT INTO MEM_UNIQUE VALUES(1,'user01','pass01','손흥민',null,null,null);
+INSERT INTO MEM_UNIQUE VALUES(2,'user01','pass02','황희찬',null,null,null);
+-- 아이디가 중복되어서 오류남.
+
+-- 뭔가 오류메세지를 하나하나 찾기가 귀찮고 힘들어
+-- 제약조건 부여시 제약조건명도 부여 가능.
+
+--컬럼레벨 방식으로 제약조건명 정하기
+DROP TABLE MEM_UNIQUE;
+CREATE TABLE MEM_UNIQUE(
+    MEM_NO NUMBER CONSTRAINT MEMNO_NN NOT NULL,
+    MEM_ID VARCHAR2(20) CONSTRAINT MEMID_NN NOT NULL,
+    MEM_PWD VARCHAR2(20) CONSTRAINT MEMPWE_NN NOT NULL,
+    MEM_NAME VARCHAR2(20) CONSTRAINT MEMNAME_NN NOT NULL,
+    GENDER CHAR(3),
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50),
+    CONSTRAINT MEMID_UQ UNIQUE(MEM_ID)
+);
+INSERT INTO MEM_UNIQUE VALUES(1,'user01','pass01','손흥민',null,null,null);
+INSERT INTO MEM_UNIQUE VALUES(2,'user01','pass02','황희찬',null,null,null);
+-- 오류남
+INSERT INTO MEM_UNIQUE VALUES(2,'user02','pass02','황희찬',null,null,null);
+INSERT INTO MEM_UNIQUE VALUES(3,'user03','pass03','이강인','ㄴ',null,null);
+
+SELECT * FROM MEM_UNIQUE;
+
+--성별에 이상한 값이 들어왔는데 데이터가 들어왔다. ->이럼 안됨.
+
+CREATE TABLE MEM_CHECK(
+    MEM_NO NUMBER NOT NULL,
+    MEM_ID VARCHAR2(20) NOT NULL UNIQUE,
+    MEM_PWD VARCHAR2(20) NOT NULL,
+    MEM_NAME VARCHAR2(20) NOT NULL,
+    GENDER CHAR(3) CHECK(GENDER IN('남','여')), -- 컬럼레벨 방식
+    PHONE VARCHAR2(13),
+    EMAIL VARCHAR2(50)
+    --CHECK(GENDER IN('남','여'))
+);
+INSERT INTO MEM_CHECK
+VALUES (1,'user01','pass01','손흥민','남',null,null);
+
+INSERT INTO MEM_CHECK
+VALUES (2,'user02','pass02','황희찬','z',null,null);
+-- 오류남 젠더에 Z을 넣었기 때문에
+-- NOT NULL제약을 안넣기에 NULL값은 가능하다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
