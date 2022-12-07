@@ -1,6 +1,16 @@
 --저장
 --실습문제--
 
+--외래키를 사용할때 drop 테이블 만드는 법
+-- 가장 최근에 만든 테입르을 젤 위에 써야한다.
+DROP TABLE TB_RENT;
+DROP TABLE TB_MEMBER;
+DROP TABLE TB_BOOK;
+DROP TABLE TB_PUBLISHER;
+
+-- 이유는 외래키로 참조하고있기에 항상 자식부터 드랍해야한다.
+
+
 --도서관리 프로그램을 만들기 위한 테이블을 만들기
 
 --이때, 제약조건에 이름을 부여할 것
@@ -8,10 +18,6 @@
 -- 각 컬럼에 주석달기
 
 
-
-
-
-?
 
 --1. 출판사들에 대한 데이터를 담기 위한 출판사 테이블(TB_PUBLISHER)
 
@@ -199,7 +205,6 @@ SELECT MEMBER_NAME, MEMBER_ID, RENT_DATE, RENT_DATE+7 AS "반납예정일"
 FROM TB_MEMBER
 JOIN TB_RENT ON(RENT_MEM_NO = MEMBER_NO)
 WHERE RENT_BOOK_NO ='A002';
-
 
 
 
