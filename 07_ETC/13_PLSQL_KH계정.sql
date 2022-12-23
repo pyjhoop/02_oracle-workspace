@@ -15,6 +15,8 @@
 -- 간단하게 화면에 HELLO ORACLE 출력!
 SET SERVEROUTPUT ON;
 
+
+
 BEGIN 
 -- System.out.prinln("hello oracle");
     DBMS_OUTPUT.PUT_LINE('HELLO ORACLE');
@@ -31,6 +33,20 @@ END;
     1_1. 일반타입변수 선언 및 초기화
          [표현식] 변수명[CONSTANT -> 상수가 됨] 자료형 [:= 값];
 */
+
+DECLARE 
+    EID NUMBER;
+    ENAME VARCHAR2(20);
+    PI CONSTANT NUMBER := 3.14;
+BEGIN
+    EID := &번호;
+    ENAME := '&이름';
+    
+    DBMS_OUTPUT.PUT_LINE('EID : '|| EID);
+    DBMS_OUTPUT.PUT_LINE('ENAME : '|| ENAME);
+END;
+/
+
 
 DECLARE 
     EID NUMBER;
@@ -72,6 +88,9 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('SAL : '||SAL);
 END;
 /
+SELECT * FROM EMPLOYEE;
+
+    
 
 ----------------------------------실습문제------------------------------------------
 /*
@@ -83,6 +102,28 @@ END;
 -- 일반 타입 변수 EID NUMBER; OR EID NUMBER := 201;
 -- 레퍼런스타입 변수 선언 : EID EMPLOYEE.EMP_ID%TYPE;
 -- 실행부에서 입력을 받고 싶으면 EID = &사번;
+
+DECLARE
+    EID EMPLOYEE.EMP_ID%TYPE;
+    ENAME EMPLOYEE.EMP_NAME%TYPE;
+    JCODE EMPLOYEE.JOB_CODE%TYPE;
+    SAL EMPLOYEE.SALARY%TYPE;
+    DTITLE DEPARTMENT.DEPT_TITLE%TYPE;
+BEGIN
+    SELECT EMP_ID, EMP_NAME, JOB_CODE, SALARY, DEPT_TITLE
+    INTO EID, ENAME, JCODE, SAL, DTITLE
+    FROM EMPLOYEE
+    JOIN DEPARTMENT ON(DEPT_CODE = DEPT_ID)
+    WHERE EMP_ID = &사번;
+    
+    DBMS_OUTPUT.PUT_LINE('EID : ' || EID);
+    DBMS_OUTPUT.PUT_LINE('사원명 : '|| ENAME);
+    DBMS_OUTPUT.PUT_LINE('JCODE : ' || JCODE);
+    DBMS_OUTPUT.PUT_LINE('급여 : ' ||SAL);
+    DBMS_OUTPUT.PUT_LINE('부서명 : '||DTITLE);
+    
+END;
+/
 
 
 
@@ -111,6 +152,22 @@ END;
 -- 테이블의 한 행에 대한 모든 컬럼값을 한꺼번에 담을 수 있는 변수
 -- [표현식] 변수명 테이블명%ROWTYPE
 -- 무조건 * 로 전체행을 조회해야함.
+
+DECLARE
+    E EMPLOYEE%ROWTYPE;
+BEGIN
+    SELECT *
+    INTO E
+    FROM EMPLOYEE
+    WHERE EMP_ID = &사번;
+    DBMS_OUTPUT.PUT_LINE('사원명 : ' || E.EMP_NAME);
+    DBMS_OUTPUT.PUT_LINE('급여 : ' || E.SALARY);
+    DBMS_OUTPUT.PUT_LINE('보너스 : ' || NVL(E.BONUS,0));
+    
+
+END;
+/
+
 
 DECLARE
     E EMPLOYEE%ROWTYPE;
